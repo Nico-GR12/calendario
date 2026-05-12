@@ -1,0 +1,175 @@
+body {
+    background-color: #f8fafc;
+    background-image: radial-gradient(#cbd5e1 0.5px, transparent 0.5px);
+    background-size: 30px 30px;
+    font-family: 'Inter', sans-serif;
+}
+
+.fc .fc-toolbar-title {
+    font-size: 1.1rem !important;
+    font-weight: 800;
+    color: #1e293b;
+    background: #f0fdf4;
+    padding: 5px 15px;
+    border-radius: 50px;
+    border: 1.5px solid #39A900;
+    text-transform: capitalize;
+}
+
+.fc .fc-button-group {
+    gap: 8px;
+}
+
+.fc .fc-button-primary {
+    background-color: #39A900 !important;
+    border: none !important;
+    font-weight: bold !important;
+    border-radius: 10px !important;
+    font-size: 0.75rem !important;
+    padding: 8px 12px !important;
+    transition: all 0.2s ease;
+}
+
+.fc .fc-button-primary:hover {
+    background-color: #2d8500 !important;
+    transform: translateY(-1px);
+}
+
+.fc .fc-button-primary:active {
+    background-color: #39A900 !important;
+}
+
+.fc-daygrid-day-frame {
+    min-height: 115px !important;
+}
+
+/* Mejoras para la vista de día */
+.fc-timegrid-slot {
+    height: 3.5rem !important;
+}
+
+.fc-timegrid-slot-label {
+    font-size: 0.75rem !important;
+    font-weight: 600 !important;
+    color: #64748b !important;
+}
+
+.fc-timegrid-event {
+    border-radius: 8px !important;
+    border: none !important;
+    padding: 4px 8px !important;
+    font-weight: 600 !important;
+    box-shadow: 0 2px 8px rgba(57, 169, 0, 0.2) !important;
+}
+
+.fc-timegrid-event .fc-event-time {
+    font-size: 0.7rem !important;
+    font-weight: 700 !important;
+    opacity: 0.9;
+}
+
+.fc-timegrid-event .fc-event-title {
+    font-size: 0.85rem !important;
+    font-weight: 700 !important;
+    margin-top: 2px;
+}
+
+.fc-timegrid-col-frame {
+    background: linear-gradient(to bottom, #ffffff 0%, #f9fafb 100%);
+}
+
+.fc-timegrid-axis {
+    background: #fafbfc !important;
+}
+
+.fc-col-header-cell {
+    background: #f8fafc !important;
+    font-weight: 700 !important;
+    padding: 12px 8px !important;
+    border-bottom: 2px solid #39A900 !important;
+}
+
+.fc-col-header-cell-cushion {
+    color: #1e293b !important;
+    font-size: 0.9rem !important;
+    text-transform: uppercase !important;
+}
+
+.fc-timegrid-now-indicator-line {
+    border-color: #ef4444 !important;
+    border-width: 2px !important;
+}
+
+.fc-timegrid-now-indicator-arrow {
+    border-color: #ef4444 !important;
+}
+
+/* Estilo para eventos en vista de mes */
+.fc-daygrid-event {
+    border-radius: 6px !important;
+    border: none !important;
+    padding: 2px 6px !important;
+    font-weight: 600 !important;
+    font-size: 0.75rem !important;
+}
+
+/* Fix para SweetAlert2 por encima del modal */
+.swal2-container {
+    z-index: 10000 !important;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .fc-col-header-cell-cushion {
+        font-size: 0.6rem !important; /* Letra bien pequeña para que quepa "miércoles" */
+        text-transform: uppercase;
+        display: block;
+        width: 100%;
+        text-align: center;
+    }
+
+    .fc .fc-toolbar {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 12px;
+    }
+
+    .fc-daygrid-day-frame {
+        min-height: 75px !important; 
+    }
+    
+    .fc .fc-toolbar-title {
+        font-size: 0.95rem !important;
+        padding: 4px 12px;
+    }
+    
+    .fc .fc-button-primary {
+        font-size: 0.7rem !important;
+        padding: 6px 10px !important;
+    }
+    
+    .fc-timegrid-slot {
+        height: 2.5rem !important;
+    }
+    
+    .fc-timegrid-slot-label {
+        font-size: 0.65rem !important;
+    }
+    
+    .fc-timegrid-event .fc-event-time {
+        font-size: 0.65rem !important;
+    }
+    
+    .fc-timegrid-event .fc-event-title {
+        font-size: 0.75rem !important;
+    }
+}
+
+/* Mejora visual para las líneas de la cuadrícula */
+.fc-scrollgrid {
+    border-color: #e2e8f0 !important;
+}
+
+.fc-timegrid-divider {
+    background: #f1f5f9 !important;
+}
