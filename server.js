@@ -7,7 +7,6 @@ require('dotenv').config();
 const app = express();
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname))); // Servir archivos estáticos
 
 // 🔴 Configuración de Aiven MySQL desde variables de entorno
 const pool = mysql.createPool({
@@ -109,6 +108,9 @@ app.delete("/reservas/:id", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+// Servir archivos estáticos (después de las rutas de la API)
+app.use(express.static(path.join(__dirname)));
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
