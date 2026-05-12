@@ -19,6 +19,14 @@ document.addEventListener('DOMContentLoaded', function() {
             right: 'dayGridMonth,timeGridDay' 
         },
         buttonText: { today: 'Hoy', month: 'Mes', day: 'Día' },
+        views: {
+            dayGridMonth: {
+                titleFormat: { year: 'numeric', month: 'long' }
+            },
+            timeGridDay: {
+                titleFormat: { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }
+            }
+        },
 
         dateClick: (info) => {
             if (info.view.type === 'dayGridMonth') {
@@ -53,17 +61,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         },
 
-        datesSet: function() {
-            const titleEl = document.querySelector('.fc-toolbar-title');
-            if (titleEl) {
-                const hoy = new Date();
-                const diaHoy = String(hoy.getDate()).padStart(2, '0');
-                const vistaActual = calendar.getDate();
-                const mesNombre = vistaActual.toLocaleString('es-ES', { month: 'long' });
-                const anioActual = vistaActual.getFullYear();
-                titleEl.innerText = `${diaHoy}/${mesNombre}/${anioActual}`;
-            }
-        }
     });
 
     calendar.render();
