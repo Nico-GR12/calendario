@@ -43,9 +43,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const data = await res.json();
 
             if (res.ok && Array.isArray(data)) {
-                console.log("📅 Cargando eventos:", data.length);
                 successCallback(data.map(res => {
-                    // Extraer la fecha sin la hora
                     const fecha = new Date(res.fecha).toISOString().split('T')[0];
                     return {
                         id: res.id,
@@ -66,17 +64,25 @@ document.addEventListener('DOMContentLoaded', function() {
     calendar.render();
 });
 
+function formatearFecha(dateStr) {
+    const soloFecha = dateStr.split('T')[0];
+    const partes = soloFecha.split('-');
+    const meses = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+    return `${parseInt(partes[2])} de ${meses[parseInt(partes[1])-1]} de ${partes[0]}`;
+}
+
 function openModal(date) {
     reservaSeleccionadaId = null;
     document.getElementById('reservaForm').reset();
     document.getElementById('fechaInput').value = date;
-
-    const partes = date.split('-');
-    const meses = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
-
-    document.getElementById('modalDateTitle').innerText = `${partes[2]}/${meses[parseInt(partes[1])-1]}/${partes[0]}`;
+    document.getElementById('modalDateTitle').innerHTML = `
+        <span class="text-white/90">+</span> Nueva Reserva
+        <p class="text-sm font-normal text-white/70 mt-1">${formatearFecha(date)}</p>
+    `;
     document.getElementById('btnEliminar').classList.add('hidden');
     document.getElementById('modal').classList.remove('hidden');
+    document.getElementById('modal').classList.add('modal-enter');
+    document.getElementById('nombre').focus();
 }
 
 function abrirParaEditar(evento) {
@@ -86,17 +92,56 @@ function abrirParaEditar(evento) {
     const inicio = evento.startStr.split('T')[1].substring(0,5);
     const fin = evento.endStr.split('T')[1].substring(0,5);
 
-    document.getElementById('modalDateTitle').innerText = "Editar Reserva";
+    document.getElementById('modalDateTitle').innerHTML = `
+        ${evento.title}
+        <span class="block text-sm font-normal text-white/70 mt-1">${formatearFecha(fecha)}</span>
+        <span class="block text-sm font-normal text-white/70">${inicio} - ${fin}</span>
+    `;
     document.getElementById('nombre').value = evento.title;
     document.getElementById('fechaInput').value = fecha;
     document.getElementById('inicio').value = inicio;
     document.getElementById('fin').value = fin;
     document.getElementById('btnEliminar').classList.remove('hidden');
     document.getElementById('modal').classList.remove('hidden');
+    document.getElementById('modal').classList.add('modal-enter');
 }
 
 function closeModal() {
+    document.getElementById('modal').classList.remove('modal-enter');
     document.getElementById('modal').classList.add('hidden');
+}
+
+function mostrarError(mensaje) {
+    Swal.fire({
+        title: 'Error',
+        text: mensaje,
+        icon: 'error',
+        confirmButtonColor: '#39A900'
+    });
+}
+
+function validarFormulario(datos) {
+    if (!datos.fecha) {
+        mostrarError('Debes seleccionar una fecha primero');
+        return false;
+    }
+    if (!datos.nombre || !datos.nombre.trim()) {
+        mostrarError('El nombre del instructor es obligatorio');
+        return false;
+    }
+    if (!datos.hora_inicio) {
+        mostrarError('La hora de inicio es obligatoria');
+        return false;
+    }
+    if (!datos.hora_fin) {
+        mostrarError('La hora de fin es obligatoria');
+        return false;
+    }
+    if (datos.hora_inicio >= datos.hora_fin) {
+        mostrarError('La hora de inicio debe ser menor a la hora de fin');
+        return false;
+    }
+    return true;
 }
 
 document.getElementById('reservaForm').onsubmit = async (e) => {
@@ -109,31 +154,49 @@ document.getElementById('reservaForm').onsubmit = async (e) => {
         hora_fin: document.getElementById('fin').value
     };
 
-    console.log("📤 Enviando datos:", datos);
+    if (!validarFormulario(datos)) return;
+
+    const btnGuardar = document.querySelector('#reservaForm button[type="submit"]');
+    const textoOriginal = btnGuardar.innerHTML;
+    btnGuardar.disabled = true;
+    btnGuardar.innerHTML = `<span class="inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span> Guardando...`;
 
     try {
+        let res;
         if (reservaSeleccionadaId) {
-            const res = await fetch(`/reservas/${reservaSeleccionadaId}`, {
+            res = await fetch(`/reservas/${reservaSeleccionadaId}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(datos)
             });
-            console.log("PUT response:", res.status);
         } else {
-            const res = await fetch("/reservas", {
+            res = await fetch("/reservas", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(datos)
             });
-            console.log("POST response:", res.status);
+        }
+
+        if (!res.ok) {
+            const data = await res.json();
+            throw new Error(data.error || `Error ${res.status}`);
         }
 
         closeModal();
         calendar.refetchEvents();
-        Swal.fire({ title: '¡Guardado!', icon: 'success' });
+        Swal.fire({
+            title: '¡Guardado!',
+            text: 'La reserva se creó correctamente',
+            icon: 'success',
+            timer: 2000,
+            showConfirmButton: false,
+            confirmButtonColor: '#39A900'
+        });
     } catch (error) {
-        console.error("❌ Error:", error);
-        Swal.fire({ title: 'Error', text: error.message, icon: 'error' });
+        mostrarError(error.message);
+    } finally {
+        btnGuardar.disabled = false;
+        btnGuardar.innerHTML = textoOriginal;
     }
 };
 
@@ -141,19 +204,37 @@ async function eliminarReserva() {
     if (!reservaSeleccionadaId) return;
 
     const result = await Swal.fire({
-        title: '¿Eliminar?',
+        title: '¿Eliminar reserva?',
+        text: 'Esta acción no se puede deshacer',
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonText: 'Sí, borrar'
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#6b7280'
     });
 
     if (result.isConfirmed) {
-        await fetch(`/reservas/${reservaSeleccionadaId}`, {
-            method: "DELETE"
-        });
+        try {
+            const res = await fetch(`/reservas/${reservaSeleccionadaId}`, {
+                method: "DELETE"
+            });
 
-        closeModal();
-        calendar.refetchEvents();
-        Swal.fire({ title: 'Eliminado', icon: 'success' });
+            if (!res.ok) {
+                const data = await res.json();
+                throw new Error(data.error || 'Error al eliminar');
+            }
+
+            closeModal();
+            calendar.refetchEvents();
+            Swal.fire({
+                title: 'Eliminado',
+                icon: 'success',
+                timer: 1500,
+                showConfirmButton: false
+            });
+        } catch (error) {
+            mostrarError(error.message);
+        }
     }
 }

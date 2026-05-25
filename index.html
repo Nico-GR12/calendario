@@ -37,35 +37,48 @@
     </main>
 
     <div id="modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4 z-[9999]">
-        <div class="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl transition-all scale-100">
-            <h2 id="modalDateTitle" class="text-xl font-bold mb-6 text-center border-b pb-2 text-gray-800"></h2>
-            <form id="reservaForm" class="space-y-4">
+        <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden">
+            <div class="relative bg-gradient-to-r from-[#39A900] to-[#2d8500] px-6 py-5 text-white">
+                <button type="button" onclick="closeModal()" class="absolute top-3 right-4 text-white/80 hover:text-white text-2xl leading-none transition-all hover:scale-110">&times;</button>
+                <h2 id="modalDateTitle" class="text-lg font-bold"></h2>
+            </div>
+            <form id="reservaForm" class="p-6 space-y-4">
                 <input type="hidden" id="fechaInput">
                 <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">Responsable</label>
-                    <input type="text" id="nombre" placeholder="Nombre del Instructor" required 
-                        class="w-full border-2 border-gray-100 p-3 rounded-xl outline-none focus:border-[#39A900] transition-colors">
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5 ml-1">
+                        <span class="inline-block mr-1">📅</span> Nombre del Evento
+                    </label>
+                    <input type="text" id="nombre" placeholder="Evento" required
+                        class="w-full border-2 border-gray-100 p-3 rounded-xl outline-none focus:border-[#39A900] focus:bg-green-50/30 transition-all">
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">Inicio</label>
-                        <input type="time" id="inicio" required class="w-full border-2 border-gray-100 p-3 rounded-xl outline-none focus:border-[#39A900]">
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5 ml-1">
+                            <span class="inline-block mr-1">🕐</span> Inicio
+                        </label>
+                        <input type="time" id="inicio" required
+                            class="w-full border-2 border-gray-100 p-3 rounded-xl outline-none focus:border-[#39A900] focus:bg-green-50/30 transition-all">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">Fin</label>
-                        <input type="time" id="fin" required class="w-full border-2 border-gray-100 p-3 rounded-xl outline-none focus:border-[#39A900]">
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5 ml-1">
+                            <span class="inline-block mr-1">🕑</span> Fin
+                        </label>
+                        <input type="time" id="fin" required
+                            class="w-full border-2 border-gray-100 p-3 rounded-xl outline-none focus:border-[#39A900] focus:bg-green-50/30 transition-all">
                     </div>
                 </div>
                 
-                <div class="flex flex-col gap-3 pt-6">
-                    <div class="flex gap-2 justify-end w-full">
-                        <button type="button" onclick="closeModal()" class="px-4 py-2 text-gray-400 font-bold hover:bg-gray-50 rounded-xl transition-all">Cancelar</button>
-                        <button type="submit" class="bg-[#39A900] hover:bg-[#2d8500] text-white px-8 py-3 rounded-xl font-bold shadow-lg transition-all active:scale-95">
-                            Guardar
-                        </button>
-                    </div>
-                    <button type="button" id="btnEliminar" onclick="eliminarReserva()" 
-                        class="hidden w-full text-red-500 font-bold text-sm py-3 rounded-xl border border-red-50 hover:bg-red-100 transition-all">
+                <div class="flex flex-col gap-3 pt-4">
+                    <button type="submit"
+                        class="w-full bg-gradient-to-r from-[#39A900] to-[#2d8500] hover:from-[#2d8500] hover:to-[#1f6b00] text-white py-3.5 rounded-xl font-bold shadow-lg transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                        💾 Guardar Reserva
+                    </button>
+                    <button type="button" onclick="closeModal()"
+                        class="w-full text-gray-400 font-semibold text-sm py-3 rounded-xl hover:bg-gray-50 transition-all">
+                        Cancelar
+                    </button>
+                    <button type="button" id="btnEliminar" onclick="eliminarReserva()"
+                        class="hidden w-full text-red-500 font-bold text-sm py-3 rounded-xl border border-red-100 hover:bg-red-50 transition-all">
                         🗑 Eliminar Reserva
                     </button>
                 </div>

@@ -64,14 +64,53 @@ app.get("/reservas", async (req, res) => {
   }
 });
 
+// 🔹 Validar datos de reserva
+function validarReserva({ nombre, fecha, hora_inicio, hora_fin }) {
+  const errores = [];
+  if (!nombre || !nombre.trim()) errores.push("El nombre del instructor es obligatorio");
+  if (!fecha) errores.push("La fecha es obligatoria");
+  if (!hora_inicio) errores.push("La hora de inicio es obligatoria");
+  if (!hora_fin) errores.push("La hora de fin es obligatoria");
+  if (hora_inicio && hora_fin && hora_inicio >= hora_fin) errores.push("La hora de inicio debe ser menor a la hora de fin");
+  return errores;
+}
+
+// 🔹 Verificar si hay reservas que se superpongan
+async function haySuperposicion(pool, fecha, hora_inicio, hora_fin, excludeId = null) {
+  let query = `
+    SELECT id FROM reservas 
+    WHERE fecha = ? 
+      AND hora_inicio < ? 
+      AND hora_fin > ?
+  `;
+  const params = [fecha, hora_fin, hora_inicio];
+  if (excludeId) {
+    query += " AND id != ?";
+    params.push(excludeId);
+  }
+  const [rows] = await pool.query(query, params);
+  return rows.length > 0;
+}
+
 // 🔹 Crear reserva
 app.post("/reservas", async (req, res) => {
   console.log("📝 POST /reservas - Datos:", req.body);
   const { nombre, fecha, hora_inicio, hora_fin } = req.body;
+
+  const errores = validarReserva({ nombre, fecha, hora_inicio, hora_fin });
+  if (errores.length > 0) {
+    return res.status(400).json({ error: errores.join(". ") });
+  }
+
   try {
+    const superpone = await haySuperposicion(pool, fecha, hora_inicio, hora_fin);
+    if (superpone) {
+      return res.status(409).json({ error: "Ya existe una reserva en ese horario" });
+    }
+
     await pool.query(
       "INSERT INTO reservas(nombre, fecha, hora_inicio, hora_fin) VALUES(?, ?, ?, ?)",
-      [nombre, fecha, hora_inicio, hora_fin]
+      [nombre.trim(), fecha, hora_inicio, hora_fin]
     );
     console.log("✅ Reserva guardada correctamente");
     res.sendStatus(200);
@@ -85,11 +124,27 @@ app.post("/reservas", async (req, res) => {
 app.put("/reservas/:id", async (req, res) => {
   const { id } = req.params;
   const { nombre, fecha, hora_inicio, hora_fin } = req.body;
+
+  const errores = validarReserva({ nombre, fecha, hora_inicio, hora_fin });
+  if (errores.length > 0) {
+    return res.status(400).json({ error: errores.join(". ") });
+  }
+
   try {
-    await pool.query(
+    const superpone = await haySuperposicion(pool, fecha, hora_inicio, hora_fin, id);
+    if (superpone) {
+      return res.status(409).json({ error: "Ya existe otra reserva en ese horario" });
+    }
+
+    const [result] = await pool.query(
       "UPDATE reservas SET nombre=?, fecha=?, hora_inicio=?, hora_fin=? WHERE id=?",
-      [nombre, fecha, hora_inicio, hora_fin, id]
+      [nombre.trim(), fecha, hora_inicio, hora_fin, id]
     );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Reserva no encontrada" });
+    }
+
     res.sendStatus(200);
   } catch (err) {
     console.error(err);
@@ -101,7 +156,10 @@ app.put("/reservas/:id", async (req, res) => {
 app.delete("/reservas/:id", async (req, res) => {
   const { id } = req.params;
   try {
-    await pool.query("DELETE FROM reservas WHERE id=?", [id]);
+    const [result] = await pool.query("DELETE FROM reservas WHERE id=?", [id]);
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Reserva no encontrada" });
+    }
     res.sendStatus(200);
   } catch (err) {
     console.error(err);
